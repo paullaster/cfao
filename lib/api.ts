@@ -1,0 +1,58 @@
+import { Paper, CalculationResult, BatchCalculationResult } from './types';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3450';
+
+
+export class BSTApiClient {
+    static async calculateSingle(
+        notation: string,
+        unit: 'kPa' | 'psi' | 'kgf/cm2' = 'kPa'
+    ): Promise<CalculationResult> {
+        const response = await fetch(`${API_BASE_URL}/api/calculate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notation, unit }),
+            cache: 'no-store' // Dynamic data
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return {
+            ...data,
+            timestamp: new Date().toISOString()
+        };
+    }
+
+    static async calculateBatch(
+        notations: string[],
+        unit: 'kPa' | 'psi' | 'kgf/cm2' = 'kPa'
+    ): Promise<BatchCalculationResult> {
+        const response = await fetch(`${API_BASE_URL}/api/batch-calculate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notations, unit }),
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.statusText}`);
+        }
+
+        return response.json();
+    }
+
+    static async getPapers(): Promise<Paper[]> {
+        const response = await fetch(`${API_BASE_URL}/api/papers`, {
+            next: { revalidate: 3600 } // Cache for 1 hour
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.statusText}`);
+        }
+
+        return response.json();
+    }
+}
