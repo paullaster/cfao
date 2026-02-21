@@ -1,9 +1,10 @@
-export type PaperType = 'K' | 'WK' | 'TK' | 'TL' | 'WTL' | 'B' | 'C' | 'E';
+export type PaperType = 'K' | 'WK' | 'TK' | 'TL' | 'WTL' | 'BL' | 'B' | 'C' | 'E';
 
 export interface Paper {
     type: PaperType;
     name: string;
     burstIndex: number;
+    rctFactor?: number;
     defaultGrammage: number;
     color?: string;
 }
@@ -15,14 +16,26 @@ export interface Layer {
     paper?: Paper; // API might not return this
     isLiner: boolean;
     contribution: number;
+    rctContribution?: number;
+}
+
+export interface BoxDimensions {
+    length: number;
+    width: number;
+    height: number;
 }
 
 export interface CalculationResult {
     notation: string;
     burstStrength: number;
+    ect?: number; // kN/m
+    bct?: number; // kN
+    bct_kgf?: number; // kgf
+    caliper?: number; // mm
     unit: 'kPa' | 'psi' | 'kgf/cm2';
     layers: Layer[];
     timestamp: string;
+    dimensions?: BoxDimensions;
 }
 
 export interface BatchCalculationRequest {
@@ -34,6 +47,7 @@ export interface BatchCalculationResult {
     results: Array<{
         notation: string;
         burstStrength: number;
+        ect?: number;
         unit: 'kPa' | 'psi' | 'kgf/cm2';
         success: boolean;
         error?: string;

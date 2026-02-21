@@ -1,4 +1,4 @@
-import { Paper, CalculationResult, BatchCalculationResult } from './types';
+import { Paper, CalculationResult, BatchCalculationResult, BoxDimensions } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3450';
 
@@ -13,6 +13,29 @@ export class BSTApiClient {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ notation, unit }),
             cache: 'no-store' // Dynamic data
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return {
+            ...data,
+            timestamp: new Date().toISOString()
+        };
+    }
+
+    static async calculateBox(
+        notation: string,
+        dimensions: BoxDimensions,
+        unit: 'kPa' | 'psi' | 'kgf/cm2' = 'kPa'
+    ): Promise<CalculationResult> {
+        const response = await fetch(`${API_BASE_URL}/api/calculate-box`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notation, ...dimensions, unit }),
+            cache: 'no-store'
         });
 
         if (!response.ok) {
@@ -47,6 +70,28 @@ export class BSTApiClient {
     static async getPapers(): Promise<Paper[]> {
         const response = await fetch(`${API_BASE_URL}/api/papers`, {
             next: { revalidate: 3600 } // Cache for 1 hour
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.statusText}`);
+        }
+
+        return response.json();
+    }
+
+    static async calculateRCT(type: string, grammage: number): Promise<{
+        type: string;
+        name: string;
+        grammage: number;
+        rctFactor: number;
+        rct: number;
+        unit: string;
+    }> {
+        const response = await fetch(`${API_BASE_URL}/api/calculate-rct`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type, grammage }),
+            cache: 'no-store'
         });
 
         if (!response.ok) {

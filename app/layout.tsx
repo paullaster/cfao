@@ -7,8 +7,8 @@ import Footer from '@/components/shared/Footer';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Corrugated BST Calculator',
-  description: 'Calculate Burst Strength for corrugated packaging materials',
+  title: 'Corrugated Packaging Strength Calculator',
+  description: 'Professional tool for calculating Burst Strength (BST), Ring Crush Test (RCT), Edge Crush Test (ECT), and Box Compression Test (BCT) of corrugated packaging materials. Designed for precision and efficiency in manufacturing.',
 };
 
 export default function RootLayout({

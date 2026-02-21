@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Paper as MuiPaper, Box, TextField, InputAdornment, Alert, Chip, Card, CardContent } from '@mui/material';
+import { Paper as MuiPaper, Box, TextField, InputAdornment, Alert, Chip, Card, CardContent, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import type { Paper } from '@/lib/types';
@@ -18,21 +18,56 @@ export default function PapersClient({ initialPapers, initialError }: PapersClie
         { 
             field: 'type', 
             headerName: 'Paper Code', 
-            width: 150,
+            width: 120,
             renderCell: (params) => (
                 <Chip label={params.value} size="small" variant="outlined" sx={{ fontWeight: 'bold' }} />
             )
         },
-        { field: 'name', headerName: 'Description', flex: 1, minWidth: 200 },
+        { field: 'name', headerName: 'Description', flex: 1, minWidth: 150 },
         { 
             field: 'burstIndex', 
-            headerName: 'Burst Index (kPa·m²/g)', 
+            headerName: 'Burst Index', 
             type: 'number', 
-            width: 200,
+            width: 130,
             align: 'right',
             headerAlign: 'right',
         },
-        // Assuming there might be other fields in Paper type, or we can add simulated ones
+        { 
+            field: 'rctFactor', 
+            headerName: 'RCT Factor', 
+            type: 'number', 
+            width: 130,
+            align: 'right',
+            headerAlign: 'right',
+            valueGetter: (value) => value || 1.0
+        },
+        {
+            field: 'defaultGrammage',
+            headerName: 'Std. Grammage',
+            type: 'number',
+            width: 140,
+            align: 'right',
+            headerAlign: 'right',
+            valueFormatter: (value) => `${value} g/m²`
+        },
+        {
+            field: 'defaultRCT',
+            headerName: 'Std. RCT (kN/m)',
+            type: 'number',
+            width: 160,
+            align: 'right',
+            headerAlign: 'right',
+            valueGetter: (_, row) => {
+                const rctFactor = row.rctFactor || 1.0;
+                const grammage = row.defaultGrammage || 125;
+                return Number(((grammage / 100) * rctFactor).toFixed(3));
+            },
+            renderCell: (params) => (
+                <Typography variant="body2" fontWeight="bold" color="primary.main">
+                    {params.value}
+                </Typography>
+            )
+        }
     ];
 
     const filteredPapers = initialPapers.filter(paper => 
