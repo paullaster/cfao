@@ -1,6 +1,7 @@
 import { Paper, CalculationResult, BatchCalculationResult, BoxDimensions } from './types';
 
 const API_BASE_URL = process.env.API_URL || 'http://localhost:3450';
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || 'boxmetric-secret-dev';
 
 
 export class BSTApiClient {
@@ -11,7 +12,10 @@ export class BSTApiClient {
         try {
             const response = await fetch(`${API_BASE_URL}/api/calculate`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-api-key': INTERNAL_API_KEY
+                },
                 body: JSON.stringify({ notation, unit }),
                 cache: 'no-store' // Dynamic data
             });
@@ -41,7 +45,10 @@ export class BSTApiClient {
         try {
             const response = await fetch(`${API_BASE_URL}/api/calculate-box`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-api-key': INTERNAL_API_KEY
+                },
                 body: JSON.stringify({ notation, ...dimensions, unit }),
                 cache: 'no-store'
             });
@@ -69,7 +76,10 @@ export class BSTApiClient {
     ): Promise<BatchCalculationResult> {
         const response = await fetch(`${API_BASE_URL}/api/batch-calculate`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'x-api-key': INTERNAL_API_KEY
+            },
             body: JSON.stringify({ notations, unit }),
             cache: 'no-store'
         });
@@ -83,6 +93,7 @@ export class BSTApiClient {
 
     static async getPapers(): Promise<Paper[]> {
         const response = await fetch(`${API_BASE_URL}/api/papers`, {
+            headers: { 'x-api-key': INTERNAL_API_KEY },
             next: { revalidate: 3600 } // Cache for 1 hour
         });
 
@@ -103,7 +114,10 @@ export class BSTApiClient {
     }> {
         const response = await fetch(`${API_BASE_URL}/api/calculate-rct`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'x-api-key': INTERNAL_API_KEY
+            },
             body: JSON.stringify({ type, grammage }),
             cache: 'no-store'
         });
