@@ -19,7 +19,7 @@ export default function Footer() {
                 borderColor: 'divider',
             }}
         >
-            <Container maxWidth="lg">
+            <Container maxWidth="xl">
                 <Grid container spacing={4}>
                     <Grid size={{xs: 12, sm: 4}}>
                         <Typography variant="h6" color="text.primary" gutterBottom>

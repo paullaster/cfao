@@ -2,14 +2,11 @@
 import {
   Container,
   Grid,
-  Card,
-  CardContent,
   Typography,
   Button,
   Box,
   Stack,
   Paper as MuiPaper,
-  Chip,
 } from '@mui/material';
 import Link from 'next/link';
 import CalculateIcon from '@mui/icons-material/Calculate';
@@ -82,7 +79,7 @@ export default async function HomePage() {
             zIndex: 0,
           }}
         />
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
           <Grid container spacing={4} alignItems="center">
             <Grid size={{ xs: 12, md: 7 }}>
               <Typography
@@ -185,7 +182,7 @@ export default async function HomePage() {
         </Container>
       </Box>
 
-      <Container maxWidth="lg" sx={{ py: 8 }}>
+      <Container maxWidth="xl" sx={{ py: 8 }}>
         {/* Features Grid */}
         <Typography variant="h3" component="h2" align="center" sx={{ mb: 6 }}>
           Powerful Tools for Manufacturing

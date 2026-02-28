@@ -17,7 +17,7 @@ export default async function PapersPage() {
     }
 
     return (
-        <Container maxWidth="lg" className="py-8">
+        <Container maxWidth="xl" className="py-8">
             <Box className="mb-8">
                 <Typography variant="h4" component="h1" gutterBottom>
                     Paper Types Database

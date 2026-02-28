@@ -91,7 +91,7 @@ export default function Header(props: Props) {
                         borderColor: 'divider',
                     }}
                 >
-                    <Container maxWidth="lg">
+                    <Container maxWidth="xl">
                         <Toolbar disableGutters>
                             {/* Mobile Menu Icon */}
                             <IconButton

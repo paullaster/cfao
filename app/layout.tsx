@@ -7,8 +7,18 @@ import Footer from '@/components/shared/Footer';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Corrugated Packaging Strength Calculator',
-  description: 'Professional tool for calculating Burst Strength (BST), Ring Crush Test (RCT), Edge Crush Test (ECT), and Box Compression Test (BCT) of corrugated packaging materials. Designed for precision and efficiency in manufacturing.',
+  title: 'BoxMetric | The Complete Corrugated Performance Suite',
+  description: 'Precision analysis for corrugated board manufacturing. Calculate BST, ECT, BCT, and Box Weight instantly with industry-standard accuracy and McKee formula integration.',
+  keywords: 'corrugated board, BST calculator, ECT, BCT, McKee formula, packaging engineering, board strength, box weight calculator',
+  authors: [{ name: 'BoxMetric' }],
+  openGraph: {
+    title: 'BoxMetric | The Complete Corrugated Performance Suite',
+    description: 'Precision analysis for corrugated board manufacturing.',
+    url: 'https://box-metrix.vercel.app',
+    siteName: 'BoxMetric',
+    locale: 'en_US',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({

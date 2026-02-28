@@ -39,7 +39,11 @@ import StraightenIcon from '@mui/icons-material/Straighten';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import { BSTApiClient } from '@/lib/api';
+import { 
+    calculateSingleAction, 
+    calculateBoxAction, 
+    calculateRCTAction 
+} from '@/app/actions/calculator';
 import type { Paper, CalculationResult } from '@/lib/types';
 
 interface CalculatorClientProps {
@@ -168,7 +172,7 @@ export default function CalculatorClient({
                     throw new Error(`Invalid ply count: ${count}. Standard board tests require 1, 3, or 5 paper layers.`);
                 }
                 const results = await Promise.all(
-                    rctLayers.map(l => BSTApiClient.calculateRCT(l.type, Number(l.grammage)))
+                    rctLayers.map(l => calculateRCTAction(l.type, Number(l.grammage)))
                 );
                 setMultiRctResults(results);
                 setResult(null);
@@ -180,14 +184,14 @@ export default function CalculatorClient({
                     if (!length || !width || !height) {
                         throw new Error("Dimensions are required for Box calculation.");
                     }
-                    calculation = await BSTApiClient.calculateBox(notation, {
+                    calculation = await calculateBoxAction(notation, {
                         length: Number(length),
                         width: Number(width),
                         height: Number(height),
                         thickness: thickness ? Number(thickness) : undefined
                     }, activeUnit);
                 } else {
-                    calculation = await BSTApiClient.calculateSingle(notation, activeUnit);
+                    calculation = await calculateSingleAction(notation, activeUnit);
                 }
 
                 setResult(calculation);
