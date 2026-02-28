@@ -47,10 +47,10 @@ export default async function CalculatorPage({
         <Container maxWidth="xl" className="py-8">
             <Box className="mb-8">
                 <Typography variant="h4" component="h1" gutterBottom>
-                    BST Calculator
+                    BoxMetric Analysis
                 </Typography>
                 <Typography variant="body1" color="textSecondary">
-                    Enter board notation to calculate Burst Strength
+                    Calculate BST, ECT, BCT, and Weight for your board and box specifications.
                 </Typography>
             </Box>
 

@@ -23,10 +23,10 @@ export default function Footer() {
                 <Grid container spacing={4}>
                     <Grid size={{xs: 12, sm: 4}}>
                         <Typography variant="h6" color="text.primary" gutterBottom>
-                            Corrugated Packaging Strength Calculator
+                            BoxMetric Performance Suite
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            Professional tool for calculating Burst Strength (BST), Ring Crush Test (RCT), Edge Crush Test (ECT), and Box Compression Test (BCT) of corrugated packaging materials. Designed for precision and efficiency in manufacturing.
+                            Professional tool for calculating Burst Strength (BST), Ring Crush Test (RCT), Edge Crush Test (ECT), Box Compression Test (BCT), and Weight of corrugated packaging. Designed for precision and efficiency in manufacturing.
                         </Typography>
                     </Grid>
                     <Grid size={{ xs: 12, sm: 4 }}>

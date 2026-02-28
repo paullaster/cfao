@@ -61,7 +61,7 @@ export default function Header(props: Props) {
     const drawer = (
         <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
             <Typography variant="h6" sx={{ my: 2, fontWeight: 'bold', color: 'primary.main' }}>
-                BST Calc
+                BoxMetric
             </Typography>
             <List>
                 {navItems.map((item) => (
@@ -122,7 +122,7 @@ export default function Header(props: Props) {
                                     },
                                 }}
                             >
-                                BST Calculator
+                                BoxMetric
                             </Typography>
 
                             {/* Logo - Mobile */}
@@ -140,7 +140,7 @@ export default function Header(props: Props) {
                                     textDecoration: 'none',
                                 }}
                             >
-                                BST Calc
+                                BoxMetric
                             </Typography>
 
                             {/* Desktop Nav */}
