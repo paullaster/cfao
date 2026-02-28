@@ -78,6 +78,7 @@ export default function CalculatorClient({
     const [length, setLength] = useState<string>('');
     const [width, setWidth] = useState<string>('');
     const [height, setHeight] = useState<string>('');
+    const [thickness, setThickness] = useState<string>('');
 
     // Multi-layer RCT State
     const [rctLayers, setRctLayers] = useState<RCTLayer[]>([{ type: papers[0]?.type || 'K', grammage: '125' }]);
@@ -182,7 +183,8 @@ export default function CalculatorClient({
                     calculation = await BSTApiClient.calculateBox(notation, {
                         length: Number(length),
                         width: Number(width),
-                        height: Number(height)
+                        height: Number(height),
+                        thickness: thickness ? Number(thickness) : undefined
                     }, activeUnit);
                 } else {
                     calculation = await BSTApiClient.calculateSingle(notation, activeUnit);
@@ -287,7 +289,7 @@ export default function CalculatorClient({
                                             Add Paper Layer
                                         </Button>
                                         {[2, 4].includes(rctLayers.length) && (
-                                            <Alert severity="warning" size="small" sx={{ py: 0 }}>
+                                            <Alert severity="warning" sx={{ py: 0 }}>
                                                 Standard board tests require 1, 3, or 5 paper layers.
                                             </Alert>
                                         )}
@@ -306,9 +308,10 @@ export default function CalculatorClient({
                                         />
                                         {mode === 'box' && (
                                             <Grid container spacing={2}>
-                                                <Grid size={{ xs: 4 }}><TextField label="Length" type="number" value={length} onChange={(e) => setLength(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
-                                                <Grid size={{ xs: 4 }}><TextField label="Width" type="number" value={width} onChange={(e) => setWidth(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
-                                                <Grid size={{ xs: 4 }}><TextField label="Height" type="number" value={height} onChange={(e) => setHeight(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
+                                                <Grid size={{ xs: 3 }}><TextField label="Length" type="number" value={length} onChange={(e) => setLength(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
+                                                <Grid size={{ xs: 3 }}><TextField label="Width" type="number" value={width} onChange={(e) => setWidth(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
+                                                <Grid size={{ xs: 3 }}><TextField label="Height" type="number" value={height} onChange={(e) => setHeight(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
+                                                <Grid size={{ xs: 3 }}><TextField label="Thick" type="number" value={thickness} onChange={(e) => setThickness(e.target.value)} size="small" placeholder="Auto" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
                                             </Grid>
                                         )}
                                     </Stack>
@@ -400,38 +403,68 @@ export default function CalculatorClient({
                 {result ? (
                     <Stack spacing={3}>
                         <Grid container spacing={2}>
-                            {(mode === 'bst' || mode === 'box') && (
-                                <Grid size={{ xs: 12, sm: (mode === 'box' || (mode === 'bst' && result.ect)) ? 6 : 12 }}>
-                                    <Card elevation={0} sx={{ background: 'linear-gradient(135deg, #1565C0 0%, #1976D2 100%)', color: 'white', borderRadius: 3, boxShadow: (theme) => theme.shadows[4], height: '100%' }}>
-                                        <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                                            <Typography variant="overline" sx={{ opacity: 0.8, letterSpacing: 1 }}>Burst Strength (BST)</Typography>
-                                            <Typography variant="h3" sx={{ fontWeight: 700, my: 1 }}>{result.burstStrength?.toFixed(2)}<Typography component="span" variant="h6" sx={{ opacity: 0.8, ml: 1 }}>{result.unit}</Typography></Typography>
-                                            {mode === 'bst' && result.ect && <Chip label={`ECT: ${result.ect?.toFixed(2)} kN/m`} sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', mt: 1 }} />}
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            )}
-                            {mode === 'ect' && (
-                                <Grid size={{ xs: 12 }}>
-                                    <Card elevation={0} sx={{ background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', color: 'white', borderRadius: 3, boxShadow: (theme) => theme.shadows[4], height: '100%' }}>
-                                        <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                                            <Typography variant="overline" sx={{ opacity: 0.8, letterSpacing: 1 }}>Edge Crush Test (ECT)</Typography>
-                                            <Typography variant="h3" sx={{ fontWeight: 700, my: 1 }}>{result.ect?.toFixed(2)}<Typography component="span" variant="h6" sx={{ opacity: 0.8, ml: 1 }}>kN/m</Typography></Typography>
-                                            <Typography variant="body1">Board Strength for: {result.notation}</Typography>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            )}
-                            {mode === 'box' && result.bct && (
-                                <Grid size={{ xs: 12, sm: 6 }}>
-                                    <Card elevation={0} sx={{ background: 'linear-gradient(135deg, #2E7D32 0%, #43A047 100%)', color: 'white', borderRadius: 3, boxShadow: (theme) => theme.shadows[4], height: '100%' }}>
-                                        <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                                            <Typography variant="overline" sx={{ opacity: 0.8, letterSpacing: 1 }}>Box Compression (BCT)</Typography>
-                                            <Typography variant="h3" sx={{ fontWeight: 700, my: 1 }}>{result.bct_kgf?.toFixed(2)}<Typography component="span" variant="h6" sx={{ opacity: 0.8, ml: 1 }}>kgf</Typography></Typography>
-                                            <Typography variant="body2" sx={{ opacity: 0.9 }}>{result.bct?.toFixed(2)} kN</Typography>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
+                            {mode === 'box' ? (
+                                <>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
+                                        <Card elevation={0} sx={{ background: 'linear-gradient(135deg, #1565C0 0%, #1976D2 100%)', color: 'white', borderRadius: 3, height: '100%' }}>
+                                            <CardContent sx={{ p: 2, textAlign: 'center' }}>
+                                                <Typography variant="overline" sx={{ opacity: 0.8 }}>BST</Typography>
+                                                <Typography variant="h4" sx={{ fontWeight: 700 }}>{result.burstStrength?.toFixed(2)}<Typography component="span" variant="caption" sx={{ opacity: 0.8, ml: 0.5 }}>{result.unit}</Typography></Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
+                                        <Card elevation={0} sx={{ background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', color: 'white', borderRadius: 3, height: '100%' }}>
+                                            <CardContent sx={{ p: 2, textAlign: 'center' }}>
+                                                <Typography variant="overline" sx={{ opacity: 0.8 }}>ECT</Typography>
+                                                <Typography variant="h4" sx={{ fontWeight: 700 }}>{result.ect?.toFixed(2)}<Typography component="span" variant="caption" sx={{ opacity: 0.8, ml: 0.5 }}>kN/m</Typography></Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
+                                        <Card elevation={0} sx={{ background: 'linear-gradient(135deg, #2E7D32 0%, #43A047 100%)', color: 'white', borderRadius: 3, height: '100%' }}>
+                                            <CardContent sx={{ p: 2, textAlign: 'center' }}>
+                                                <Typography variant="overline" sx={{ opacity: 0.8 }}>BCT</Typography>
+                                                <Typography variant="h4" sx={{ fontWeight: 700 }}>{result.bct_kgf?.toFixed(2)}<Typography component="span" variant="caption" sx={{ opacity: 0.8, ml: 0.5 }}>kgf</Typography></Typography>
+                                                <Typography variant="caption" sx={{ opacity: 0.9 }}>{result.bct?.toFixed(2)} kN</Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
+                                        <Card elevation={0} sx={{ background: 'linear-gradient(135deg, #607D8B 0%, #455A64 100%)', color: 'white', borderRadius: 3, height: '100%' }}>
+                                            <CardContent sx={{ p: 2, textAlign: 'center' }}>
+                                                <Typography variant="overline" sx={{ opacity: 0.8 }}>Box Weight</Typography>
+                                                <Typography variant="h4" sx={{ fontWeight: 700 }}>{result.weight_kg?.toFixed(3)}<Typography component="span" variant="caption" sx={{ opacity: 0.8, ml: 0.5 }}>kg</Typography></Typography>
+                                                <Typography variant="caption" sx={{ opacity: 0.9 }}>{result.weight_g?.toFixed(1)} g</Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                </>
+                            ) : (
+                                <>
+                                    {(mode === 'bst') && (
+                                        <Grid size={{ xs: 12, sm: result.ect ? 6 : 12 }}>
+                                            <Card elevation={0} sx={{ background: 'linear-gradient(135deg, #1565C0 0%, #1976D2 100%)', color: 'white', borderRadius: 3, boxShadow: (theme) => theme.shadows[4], height: '100%' }}>
+                                                <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                                                    <Typography variant="overline" sx={{ opacity: 0.8, letterSpacing: 1 }}>Burst Strength (BST)</Typography>
+                                                    <Typography variant="h3" sx={{ fontWeight: 700, my: 1 }}>{result.burstStrength?.toFixed(2)}<Typography component="span" variant="h6" sx={{ opacity: 0.8, ml: 1 }}>{result.unit}</Typography></Typography>
+                                                    {result.ect && <Chip label={`ECT: ${result.ect?.toFixed(2)} kN/m`} sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', mt: 1 }} />}
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    )}
+                                    {mode === 'ect' && (
+                                        <Grid size={{ xs: 12 }}>
+                                            <Card elevation={0} sx={{ background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', color: 'white', borderRadius: 3, boxShadow: (theme) => theme.shadows[4], height: '100%' }}>
+                                                <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                                                    <Typography variant="overline" sx={{ opacity: 0.8, letterSpacing: 1 }}>Edge Crush Test (ECT)</Typography>
+                                                    <Typography variant="h3" sx={{ fontWeight: 700, my: 1 }}>{result.ect?.toFixed(2)}<Typography component="span" variant="h6" sx={{ opacity: 0.8, ml: 1 }}>kN/m</Typography></Typography>
+                                                    <Typography variant="body1">Board Strength for: {result.notation}</Typography>
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    )}
+                                </>
                             )}
                         </Grid>
                         <Box>
@@ -451,7 +484,13 @@ export default function CalculatorClient({
                                 })}
                             </Stack>
                         </Box>
-                        {result.caliper && <Alert severity="info" icon={<InfoIcon />}>Theoretical Board Caliper: <strong>{result.caliper?.toFixed(2)} mm</strong></Alert>}
+                        {result.caliper && (
+                            <Alert severity="info" icon={<InfoIcon />}>
+                                {thickness ? "Using User Caliper: " : "Theoretical Board Caliper: "}
+                                <strong>{result.caliper?.toFixed(2)} mm</strong>
+                                {thickness && result.caliperFallback && <Typography component="span" variant="caption" sx={{ ml: 1 }}>(Calculated was: {result.caliperFallback.toFixed(2)}mm)</Typography>}
+                            </Alert>
+                        )}
                     </Stack>
                 ) : (
                      <Box sx={{ height: '100%', minHeight: 400, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default', borderRadius: 4, border: '2px dashed', borderColor: 'divider' }}>
@@ -472,7 +511,12 @@ export default function CalculatorClient({
                                     <Card variant="outlined" sx={{ '&:hover': { borderColor: 'primary.main' } }}>
                                         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="subtitle2">{item.notation}</Typography>{item.bct ? <Typography variant="subtitle2" color="success.main">{item.bct_kgf?.toFixed(2)} kgf</Typography> : <Typography variant="subtitle2" color="primary.main">{item.burstStrength?.toFixed(2)} {item.unit}</Typography>}</Box>
-                                            <Typography variant="caption" color="text.secondary">{item.ect && `ECT: ${item.ect?.toFixed(2)} kN/m`} • <SafeTimestamp timestamp={item.timestamp} /></Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {item.ect && `ECT: ${item.ect?.toFixed(2)} kN/m`} 
+                                                {item.weight_kg && ` • ${item.weight_kg.toFixed(2)}kg`}
+                                                {item.caliper && ` • ${item.caliper.toFixed(1)}mm`}
+                                                {` • `}<SafeTimestamp timestamp={item.timestamp} />
+                                            </Typography>
                                         </CardContent>
                                     </Card>
                                 </Grid>

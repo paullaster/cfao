@@ -23,6 +23,7 @@ export interface BoxDimensions {
     length: number;
     width: number;
     height: number;
+    thickness?: number;
 }
 
 export interface CalculationResult {
@@ -32,6 +33,10 @@ export interface CalculationResult {
     bct?: number; // kN
     bct_kgf?: number; // kgf
     caliper?: number; // mm
+    caliperFallback?: number; // mm
+    totalGrammage?: number; // g/m2
+    weight_g?: number;
+    weight_kg?: number;
     unit: 'kPa' | 'psi' | 'kgf/cm2';
     layers: Layer[];
     timestamp: string;
