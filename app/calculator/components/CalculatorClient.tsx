@@ -227,7 +227,7 @@ export default function CalculatorClient({
     return (
         <Grid container spacing={4}>
             {/* Input Column */}
-            <Grid size={{ xs: 12, md: 5 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
                 <Stack spacing={3}>
                     <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
                         <CardContent sx={{ p: 0 }}>
@@ -308,10 +308,10 @@ export default function CalculatorClient({
                                         />
                                         {mode === 'box' && (
                                             <Grid container spacing={2}>
-                                                <Grid size={{ xs: 3 }}><TextField label="Length" type="number" value={length} onChange={(e) => setLength(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
-                                                <Grid size={{ xs: 3 }}><TextField label="Width" type="number" value={width} onChange={(e) => setWidth(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
-                                                <Grid size={{ xs: 3 }}><TextField label="Height" type="number" value={height} onChange={(e) => setHeight(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
-                                                <Grid size={{ xs: 3 }}><TextField label="Thick" type="number" value={thickness} onChange={(e) => setThickness(e.target.value)} size="small" placeholder="Auto" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
+                                                <Grid size={{ xs: 6 }}><TextField fullWidth label="Length" type="number" value={length} onChange={(e) => setLength(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
+                                                <Grid size={{ xs: 6 }}><TextField fullWidth label="Width" type="number" value={width} onChange={(e) => setWidth(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
+                                                <Grid size={{ xs: 6 }}><TextField fullWidth label="Height" type="number" value={height} onChange={(e) => setHeight(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
+                                                <Grid size={{ xs: 6 }}><TextField fullWidth label="Thickness" type="number" value={thickness} onChange={(e) => setThickness(e.target.value)} size="small" placeholder="Auto" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
                                             </Grid>
                                         )}
                                     </Stack>
@@ -373,7 +373,7 @@ export default function CalculatorClient({
             </Grid>
 
             {/* Results Column */}
-            <Grid size={{ xs: 12, md: 7 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
                 {error && (
                     <Alert severity="error" sx={{ mb: 3, border: '1px solid', borderColor: 'error.light', borderRadius: 2 }} onClose={() => setError(null)}>
                         <AlertTitle sx={{ fontWeight: 700 }}>Something went wrong</AlertTitle>
