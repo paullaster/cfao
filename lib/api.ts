@@ -8,22 +8,29 @@ export class BSTApiClient {
         notation: string,
         unit: 'kPa' | 'psi' | 'kgf/cm2' = 'kPa'
     ): Promise<CalculationResult> {
-        const response = await fetch(`${API_BASE_URL}/api/calculate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ notation, unit }),
-            cache: 'no-store' // Dynamic data
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/calculate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notation, unit }),
+                cache: 'no-store' // Dynamic data
+            });
 
-        if (!response.ok) {
-            throw new Error(`API error: ${response.statusText}`);
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => '');
+                console.error(`[BSTApiClient] Server error on ${API_BASE_URL}: ${response.status} ${response.statusText}`, errorText);
+                throw new Error(`API error: ${response.statusText || 'Internal Server Error'}`);
+            }
+
+            const data = await response.json();
+            return {
+                ...data,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            console.error(`[BSTApiClient] Fetch failure on ${API_BASE_URL}:`, error);
+            throw error;
         }
-
-        const data = await response.json();
-        return {
-            ...data,
-            timestamp: new Date().toISOString()
-        };
     }
 
     static async calculateBox(
@@ -31,22 +38,29 @@ export class BSTApiClient {
         dimensions: BoxDimensions,
         unit: 'kPa' | 'psi' | 'kgf/cm2' = 'kPa'
     ): Promise<CalculationResult> {
-        const response = await fetch(`${API_BASE_URL}/api/calculate-box`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ notation, ...dimensions, unit }),
-            cache: 'no-store'
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/calculate-box`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notation, ...dimensions, unit }),
+                cache: 'no-store'
+            });
 
-        if (!response.ok) {
-            throw new Error(`API error: ${response.statusText}`);
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => '');
+                console.error(`[BSTApiClient] Server error on ${API_BASE_URL}: ${response.status} ${response.statusText}`, errorText);
+                throw new Error(`API error: ${response.statusText || 'Internal Server Error'}`);
+            }
+
+            const data = await response.json();
+            return {
+                ...data,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            console.error(`[BSTApiClient] Fetch failure on ${API_BASE_URL}:`, error);
+            throw error;
         }
-
-        const data = await response.json();
-        return {
-            ...data,
-            timestamp: new Date().toISOString()
-        };
     }
 
     static async calculateBatch(
