@@ -1,7 +1,7 @@
 // app/calculator/components/CalculatorClient.tsx
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
     Card,
     CardContent,
@@ -20,7 +20,6 @@ import {
     Stack,
     InputLabel,
     FormControl,
-    Tooltip,
     Tabs,
     Tab,
     InputAdornment,
@@ -60,13 +59,19 @@ interface RCTLayer {
 
 function SafeTimestamp({ timestamp }: { timestamp: string }) {
     const [mounted, setMounted] = useState(false);
-    useEffect(() => setMounted(true), []);
+    useEffect(() => {
+        const id = setTimeout(() => setMounted(true), 0);
+        return () => clearTimeout(id);
+    }, []);
     if (!mounted) return null;
+    let formatted: string | null;
     try {
-        return <>{new Date(timestamp).toLocaleTimeString()}</>;
-    } catch (e) {
-        return null;
+        formatted = new Date(timestamp).toLocaleTimeString();
+    } catch {
+        formatted = null;
     }
+
+    return formatted ? <>{formatted}</> : null;
 }
 
 export default function CalculatorClient({
@@ -134,7 +139,7 @@ export default function CalculatorClient({
                 return newLayers;
             }
             return null;
-        } catch (e) {
+        } catch{
             return null;
         }
     };
@@ -209,7 +214,7 @@ export default function CalculatorClient({
         } finally {
             setLoading(false);
         }
-    }, [notation, unit, mode, length, width, height, rctLayers]);
+    }, [unit, mode, rctLayers, notation, length, width, height, thickness]);
 
     // Handle unit change with immediate recalculation
     const handleUnitChange = (newUnit: typeof unit) => {
