@@ -16,7 +16,7 @@ export default function PapersClient({ initialPapers, initialError }: PapersClie
 
     const columns: GridColDef[] = [
         { 
-            field: 'type', 
+            field: 'code', 
             headerName: 'Paper Code', 
             width: 120,
             renderCell: (params) => (
@@ -71,12 +71,12 @@ export default function PapersClient({ initialPapers, initialError }: PapersClie
     ];
 
     const filteredPapers = initialPapers.filter(paper => 
-        paper.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        paper.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
         paper.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const rows = filteredPapers.map((paper, index) => ({
-        id: index, // or paper.type if unique
+        id: index, // or paper.code if unique
         ...paper
     }));
 

@@ -12,10 +12,13 @@ import Link from 'next/link';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import BatchIcon from '@mui/icons-material/History';
+import InsightsIcon from '@mui/icons-material/Insights';
+import GavelIcon from '@mui/icons-material/Gavel';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { BSTApiClient } from '@/lib/api';
 import type { Paper } from '@/lib/types';
 import FeatureCard from '@/components/shared/FeatureCard';
+import Box3D from '@/components/shared/Box3D';
 
 export default async function HomePage() {
   // Fetch papers on the server for initial data
@@ -28,28 +31,44 @@ export default async function HomePage() {
 
   const features = [
     {
-      title: 'Single Calculation',
-      description: 'Precision analysis for individual board specs with instant validation.',
+      title: 'Structural Intelligence',
+      description: 'Precision analysis for BST, ECT, and BCT with instant engineering validation.',
       icon: <CalculateIcon fontSize="inherit" />,
       href: '/calculator',
-      color: '#1565C0', // Industrial Blue
-      cta: 'Start Calculating',
+      color: '#1565C0',
+      cta: 'Start Analysis',
     },
     {
-      title: 'Paper Database',
-      description: 'Access the global catalog of paper grades and burst strength indices.',
+      title: 'Cost & ESG Optimizer',
+      description: 'AI-driven solver to find the lowest-cost and lowest-carbon material recipes.',
+      icon: <InsightsIcon fontSize="inherit" />,
+      href: '/optimize',
+      color: '#00838F',
+      cta: 'Optimize Now',
+    },
+    {
+      title: 'Forensic Auditing',
+      description: 'Post-failure analysis accounting for humidity, storage time, and creep decay.',
+      icon: <GavelIcon fontSize="inherit" />,
+      href: '/audit',
+      color: '#C62828',
+      cta: 'Run Audit',
+    },
+    {
+      title: 'Material Database',
+      description: 'Global catalog of paper grades, structural indices, and cost factors.',
       icon: <LibraryBooksIcon fontSize="inherit" />,
       href: '/papers',
-      color: '#EF6C00', // Safety Orange
-      cta: 'Browse Database',
+      color: '#EF6C00',
+      cta: 'Explore Data',
     },
     {
       title: 'Batch Processing',
-      description: 'Optimized workflow for high-volume manufacturing specifications.',
+      description: 'High-volume analysis for production runs and complex material catalogs.',
       icon: <BatchIcon fontSize="inherit" />,
       href: '/batch',
-      color: '#2E7D32', // Success Green
-      cta: 'Process Batch',
+      color: '#2E7D32',
+      cta: 'Bulk Process',
     },
   ];
 
@@ -60,135 +79,123 @@ export default async function HomePage() {
         sx={{
           bgcolor: 'primary.main',
           color: 'primary.contrastText',
-          py: { xs: 8, md: 12 },
-          background: 'linear-gradient(135deg, #1565C0 0%, #0D47A1 100%)',
+          py: { xs: 6, md: 10 },
+          background: 'linear-gradient(135deg, #1A237E 0%, #0D47A1 100%)',
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        {/* Abstract shapes for visual interest */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: -100,
-            right: -100,
-            width: 400,
-            height: 400,
-            borderRadius: '50%',
-            bgcolor: 'rgba(255,255,255,0.05)',
-            zIndex: 0,
-          }}
-        />
         <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
           <Grid container spacing={4} alignItems="center">
-            <Grid size={{ xs: 12, md: 7 }}>
-              <Typography
-                variant="h1"
-                component="h1"
-                sx={{ mb: 2, fontSize: { xs: '2.5rem', md: '3.5rem' } }}
-              >
-                BoxMetric: Precision Metrics for <br /> Modern Box Manufacturing
-              </Typography>
-              <Typography
-                variant="h5"
-                sx={{ mb: 4, opacity: 0.9, maxWidth: 600, fontWeight: 400 }}
-              >
-                The all-in-one platform for estimating board strength and box performance. 
-                Analyze BST, ECT, BCT, and total box weight based on your custom board notations.
-              </Typography>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                <Link href="/calculator" passHref>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    size="large"
-                    endIcon={<ArrowForwardIcon />}
-                    sx={{ px: 4, py: 1.5, fontSize: '1.1rem' }}
-                  >
-                    Calculate Now
-                  </Button>
-                </Link>
-                <Link href="/papers" passHref>
-                  <Button
-                    variant="outlined"
-                    color="inherit"
-                    size="large"
-                    sx={{ px: 4, py: 1.5, fontSize: '1.1rem', borderColor: 'rgba(255,255,255,0.5)' }}
-                  >
-                    View Database
-                  </Button>
-                </Link>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Stack spacing={3}>
+                <Typography
+                  variant="h1"
+                  component="h1"
+                  sx={{ fontSize: { xs: '2.8rem', md: '4rem' }, fontWeight: 800, lineHeight: 1.1 }}
+                >
+                  Engineering <br />
+                  <Box component="span" sx={{ color: '#64B5F6' }}>Intelligence</Box> for <br />
+                  Packaging
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{ color: 'white', maxWidth: 550, fontWeight: 400, lineHeight: 1.6 }}
+                >
+                  BoxMetric automates structural physics and material optimization. 
+                  Design stronger boxes, reduce paper waste, and certify your carbon footprint.
+                </Typography>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ pt: 2 }}>
+                  <Link href="/calculator" passHref>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      size="large"
+                      endIcon={<ArrowForwardIcon />}
+                      sx={{ px: 4, py: 1.8, fontSize: '1.1rem', borderRadius: 2, boxShadow: '0 10px 20px rgba(0,0,0,0.2)' }}
+                    >
+                      Analyze Spec
+                    </Button>
+                  </Link>
+                  <Link href="/optimize" passHref>
+                    <Button
+                      variant="outlined"
+                      size="large"
+                      sx={{ 
+                        px: 4, 
+                        py: 1.8, 
+                        fontSize: '1.1rem', 
+                        borderRadius: 2, 
+                        borderWidth: 2, 
+                        color: 'white',
+                        borderColor: 'white',
+                        '&:hover': { 
+                          borderWidth: 2, 
+                          borderColor: 'white',
+                          bgcolor: 'rgba(255,255,255,0.1)'
+                        } 
+                      }}
+                    >
+                      Cost Solver
+                    </Button>
+                  </Link>
+                </Stack>
               </Stack>
             </Grid>
-            <Grid size={{ xs: 12, md: 5 }} sx={{ display: { xs: 'none', md: 'block' } }}>
-              <Box
-                sx={{
-                  position: 'relative',
-                  width: '100%',
-                  height: 400,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {/* Technical Grid Background */}
-                <Box sx={{ 
-                  position: 'absolute', 
-                  width: '100%', 
-                  height: '100%', 
-                  opacity: 0.1,
-                  backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                  backgroundSize: '30px 30px'
-                }} />
-
-                {/* Technical 3D Box Illustration */}
-                <Box
-                  component="svg"
-                  viewBox="0 0 24 24"
-                  sx={{
-                    width: '280px',
-                    height: '280px',
-                    filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.2))',
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box sx={{ position: 'relative', height: { xs: 300, md: 500 } }}>
+                <Box3D dimensions={{ length: 300, width: 250, height: 250 }} />
+                
+                {/* Data overlays for "Effectiveness at a glance" */}
+                <MuiPaper 
+                  sx={{ 
+                    position: 'absolute', 
+                    top: '20%', 
+                    right: '10%', 
+                    p: 2, 
+                    borderRadius: 3, 
+                    bgcolor: 'rgba(255,255,255,0.9)', 
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                    display: { xs: 'none', lg: 'block' }
                   }}
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  {/* Main Box Structure */}
-                  <path d="M12 2L3 7V17L12 22L21 17V7L12 2Z" fill="white" fillOpacity="0.05" stroke="white" strokeWidth="0.5" strokeOpacity="0.3"/>
-                  <path d="M12 22V12L3 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.8"/>
-                  <path d="M12 12L21 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.8"/>
-                  <path d="M3 7V17L12 22L21 17V7L12 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.8"/>
-                  
-                  {/* Flap detail */}
-                  <path d="M12 2L21 7L12 12L3 7L12 2Z" fill="white" fillOpacity="0.1"/>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold', display: 'block' }}>BCT PREDICTION</Typography>
+                  <Typography variant="h4" color="primary" sx={{ fontWeight: 900 }}>482.5 <Typography component="span" variant="body2">kgf</Typography></Typography>
+                </MuiPaper>
 
-                  {/* Technical Dimension Lines (Orange) */}
-                  <g opacity="0.8">
-                    {/* Vertical Dimension */}
-                    <path d="M23 7V17" stroke="#EF6C00" strokeWidth="1" strokeDasharray="2 2" />
-                    <path d="M22.5 7H23.5M22.5 17H23.5" stroke="#EF6C00" strokeWidth="1" />
-                    
-                    {/* Horizontal Width Dimension */}
-                    <path d="M3 18.5L12 23.5" stroke="#EF6C00" strokeWidth="1" strokeDasharray="2 2" />
-                    <path d="M2.5 18L3.5 19M11.5 23L12.5 24" stroke="#EF6C00" strokeWidth="1" />
-                    
-                    {/* Measurement Labels (Abstract) */}
-                    <rect x="23.5" y="11" width="4" height="2" rx="0.5" fill="#EF6C00" transform="rotate(90 23.5 11)" />
-                  </g>
-                </Box>
+                <MuiPaper 
+                  sx={{ 
+                    position: 'absolute', 
+                    bottom: '20%', 
+                    left: '10%', 
+                    p: 2, 
+                    borderRadius: 3, 
+                    bgcolor: 'rgba(255,255,255,0.9)', 
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                    display: { xs: 'none', lg: 'block' }
+                  }}
+                >
+                  <Typography variant="caption" color="success.main" sx={{ fontWeight: 'bold', display: 'block' }}>CARBON IMPACT</Typography>
+                  <Typography variant="h4" color="success.main" sx={{ fontWeight: 900 }}>-12.4 <Typography component="span" variant="body2">% CO2e</Typography></Typography>
+                </MuiPaper>
               </Box>
             </Grid>
           </Grid>
         </Container>
       </Box>
 
-      <Container maxWidth="xl" sx={{ py: 8 }}>
-        {/* Features Grid */}
-        <Typography variant="h3" component="h2" align="center" sx={{ mb: 6 }}>
-          Powerful Tools for Manufacturing
-        </Typography>
+      <Container maxWidth="xl" sx={{ py: 10 }}>
+        {/* Value Prop Section */}
+        <Box sx={{ mb: 8, textAlign: 'center' }}>
+          <Typography variant="overline" color="primary" sx={{ fontWeight: 'bold', letterSpacing: 2 }}>THE PLATFORM</Typography>
+          <Typography variant="h3" sx={{ fontWeight: 800, mt: 1 }}>Complete Material Intelligence</Typography>
+        </Box>
 
-        <Grid container spacing={4} sx={{ mb: 10 }}>
+        <Grid container spacing={4} sx={{ mb: 12 }}>
           {features.map((feature) => (
             <Grid size={{ xs: 12, md: 4 }} key={feature.title}>
               <FeatureCard {...feature} />

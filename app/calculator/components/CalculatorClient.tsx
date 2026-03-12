@@ -25,6 +25,7 @@ import {
     InputAdornment,
     AlertTitle,
     IconButton,
+    Autocomplete,
 } from '@mui/material';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import LayersIcon from '@mui/icons-material/Layers';
@@ -37,13 +38,18 @@ import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 import { 
     calculateSingleAction, 
     calculateBoxAction, 
-    calculateRCTAction 
+    calculateRCTAction,
+    downloadCertificateAction,
+    getPapersAction
 } from '@/app/actions/calculator';
 import type { Paper, CalculationResult } from '@/lib/types';
+import Box3D from '@/components/shared/Box3D';
+import VirtualizedPaperAutocomplete from '@/components/shared/VirtualizedPaperAutocomplete';
 
 interface CalculatorClientProps {
     initialNotation: string;
@@ -53,7 +59,8 @@ interface CalculatorClientProps {
 }
 
 interface RCTLayer {
-    type: string;
+    id?: number;
+    code: string;
     grammage: string;
 }
 
@@ -88,9 +95,14 @@ export default function CalculatorClient({
     const [width, setWidth] = useState<string>('');
     const [height, setHeight] = useState<string>('');
     const [thickness, setThickness] = useState<string>('');
+    const [qaTarget, setQaTarget] = useState<string>(''); // For Floor QA Mode
 
     // Multi-layer RCT State
-    const [rctLayers, setRctLayers] = useState<RCTLayer[]>([{ type: papers[0]?.type || 'K', grammage: '125' }]);
+    const [rctLayers, setRctLayers] = useState<RCTLayer[]>([{ 
+        id: papers.find(p => p.isLiner)?.id || papers[0]?.id,
+        code: papers.find(p => p.isLiner)?.code || 'K', 
+        grammage: String(papers.find(p => p.isLiner)?.defaultGrammage || '125') 
+    }]);
     const [multiRctResults, setMultiRctResults] = useState<any[]>([]);
 
     const [unit, setUnit] = useState<'kPa' | 'psi' | 'kgf/cm2'>(initialUnit);
@@ -100,6 +112,7 @@ export default function CalculatorClient({
     const [history, setHistory] = useState<CalculationResult[]>(
         initialResult ? [initialResult] : []
     );
+    const [downloading, setDownloading] = useState(false);
 
     const examples = [
         '125K/127B/125K',
@@ -112,11 +125,25 @@ export default function CalculatorClient({
         setHistory([]);
     };
 
+    // Helper to determine if a layer index should be a liner or flute based on ply count
+    const getExpectedPaperType = (index: number, totalPlies: number): boolean => {
+        if (totalPlies === 1) return true; // Single paper is usually liner for BST
+        if (totalPlies === 3) {
+            // Standard 3-ply: Liner (0), Flute (1), Liner (2)
+            return index !== 1;
+        }
+        if (totalPlies === 5) {
+            // Standard 5-ply: Liner (0), Flute (1), Liner (2), Flute (3), Liner (4)
+            return index % 2 === 0;
+        }
+        return true; // Default
+    };
+
     // Helper to build notation from layers
     const buildNotationFromLayers = (layers: RCTLayer[]) => {
-        return layers
-            .filter(l => l.type && l.grammage)
-            .map(l => `${l.grammage}${l.type}`)
+        const activeLayers = layers.filter(l => l.code && l.grammage);
+        return activeLayers
+            .map(l => `${l.grammage}${l.code}`)
             .join('/');
     };
 
@@ -129,13 +156,16 @@ export default function CalculatorClient({
             const newLayers: RCTLayer[] = parts.map(part => {
                 const match = part.trim().match(/^(\d+)([a-zA-Z]+)$/);
                 if (match) {
-                    return { grammage: match[1], type: match[2].toUpperCase() };
+                    const grammage = match[1];
+                    const code = match[2].toUpperCase();
+                    const paper = papers.find(p => p.code === code && String(p.defaultGrammage) === grammage);
+                    return { id: paper?.id, grammage, code };
                 }
                 throw new Error("Invalid format");
             });
 
-            // Validate all types exist
-            if (newLayers.every(l => papers.some(p => p.type === l.type))) {
+            // Validate all codes exist
+            if (newLayers.every(l => papers.some(p => p.code === l.code))) {
                 return newLayers;
             }
             return null;
@@ -146,7 +176,17 @@ export default function CalculatorClient({
 
     const handleAddRctLayer = () => {
         if (rctLayers.length >= 5) return;
-        const newLayers = [...rctLayers, { type: papers[0]?.type || 'K', grammage: '125' }];
+        const nextIndex = rctLayers.length;
+        const isLiner = getExpectedPaperType(nextIndex, rctLayers.length + 1);
+        
+        // Find default paper based on expected type
+        const defaultPaper = papers.find(p => p.isLiner === isLiner) || papers[0];
+        
+        const newLayers = [...rctLayers, { 
+            id: defaultPaper?.id,
+            code: defaultPaper?.code || 'K', 
+            grammage: String(defaultPaper?.defaultGrammage || '125') 
+        }];
         setRctLayers(newLayers);
         setNotation(buildNotationFromLayers(newLayers));
     };
@@ -158,9 +198,24 @@ export default function CalculatorClient({
         setNotation(buildNotationFromLayers(newLayers));
     };
 
-    const handleRctLayerChange = (index: number, field: keyof RCTLayer, value: string) => {
+    const handleRctLayerChange = (index: number, field: keyof RCTLayer, value: any) => {
         const newLayers = [...rctLayers];
-        newLayers[index] = { ...newLayers[index], [field]: value };
+        let updatedLayer = { ...newLayers[index] };
+
+        if (field === 'id') {
+            const paper = papers.find(p => p.id === value);
+            if (paper) {
+                updatedLayer = {
+                    id: paper.id,
+                    code: paper.code,
+                    grammage: String(paper.defaultGrammage)
+                };
+            }
+        } else {
+            updatedLayer[field as 'grammage' | 'code'] = value;
+        }
+        
+        newLayers[index] = updatedLayer;
         setRctLayers(newLayers);
         setNotation(buildNotationFromLayers(newLayers));
     };
@@ -176,8 +231,21 @@ export default function CalculatorClient({
                 if (![1, 3, 5].includes(count)) {
                     throw new Error(`Invalid ply count: ${count}. Standard board tests require 1, 3, or 5 paper layers.`);
                 }
+
+                // Validate Layer Composition
+                for (let i = 0; i < rctLayers.length; i++) {
+                    const layer = rctLayers[i];
+                    const paper = papers.find(p => p.id === layer.id || p.code === layer.code);
+                    const expectedLiner = getExpectedPaperType(i, count);
+                    
+                    if (paper && (paper.isLiner !== expectedLiner)) {
+                        const type = expectedLiner ? 'Liner' : 'Flute';
+                        throw new Error(`Layer ${i + 1} mismatch: Expected a ${type} for ${count}-ply construction.`);
+                    }
+                }
+
                 const results = await Promise.all(
-                    rctLayers.map(l => calculateRCTAction(l.type, Number(l.grammage)))
+                    rctLayers.map(l => calculateRCTAction(l.code, Number(l.grammage)))
                 );
                 setMultiRctResults(results);
                 setResult(null);
@@ -214,7 +282,7 @@ export default function CalculatorClient({
         } finally {
             setLoading(false);
         }
-    }, [unit, mode, rctLayers, notation, length, width, height, thickness]);
+    }, [unit, mode, rctLayers, notation, length, width, height, thickness, papers]);
 
     // Handle unit change with immediate recalculation
     const handleUnitChange = (newUnit: typeof unit) => {
@@ -230,6 +298,31 @@ export default function CalculatorClient({
         const parsed = parseLayersFromNotation(val);
         if (parsed) {
             setRctLayers(parsed);
+        }
+    };
+
+    const handleDownloadCertificate = async () => {
+        if (!result) return;
+        setDownloading(true);
+        try {
+            const base64 = await downloadCertificateAction({
+                notation: result.notation,
+                length: Number(length) || 300,
+                width: Number(width) || 200,
+                height: Number(height) || 200,
+            });
+            
+            // Create a link and trigger download
+            const link = document.createElement('a');
+            link.href = `data:application/pdf;base64,${base64}`;
+            link.download = `certificate-${result.notation.replace(/[/|]/g, '-')}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (err: any) {
+            setError('Failed to download certificate: ' + err.message);
+        } finally {
+            setDownloading(false);
         }
     };
 
@@ -265,24 +358,30 @@ export default function CalculatorClient({
                                     <Stack spacing={2}>
                                         {rctLayers.map((layer, idx) => (
                                             <Box key={idx} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                                <Typography variant="caption" sx={{ minWidth: 20, fontWeight: 'bold' }}>{idx + 1}.</Typography>
-                                                <FormControl size="small" sx={{ flex: 2 }}>
-                                                    <Select
-                                                        value={layer.type}
-                                                        onChange={(e) => handleRctLayerChange(idx, 'type', e.target.value)}
-                                                    >
-                                                        {papers.map((p) => (
-                                                            <MenuItem key={p.type} value={p.type}>{p.type} - {p.name}</MenuItem>
-                                                        ))}
-                                                    </Select>
-                                                </FormControl>
+                                                <Box sx={{ minWidth: 24, textAlign: 'center' }}>
+                                                    <Typography variant="caption" sx={{ fontWeight: 'bold', color: getExpectedPaperType(idx, rctLayers.length) ? 'primary.main' : 'warning.main' }}>
+                                                        {getExpectedPaperType(idx, rctLayers.length) ? 'L' : 'F'}
+                                                    </Typography>
+                                                </Box>
+                                                <VirtualizedPaperAutocomplete
+                                                    sx={{ flex: 2 }}
+                                                    label={getExpectedPaperType(idx, rctLayers.length) ? `Liner ${idx+1}` : `Flute ${idx+1}`}
+                                                    initialOptions={papers}
+                                                    isLinerFilter={getExpectedPaperType(idx, rctLayers.length)}
+                                                    value={papers.find(p => p.id === layer.id) || null}
+                                                    onChange={(newValue) => {
+                                                        if (newValue) {
+                                                            handleRctLayerChange(idx, 'id', newValue.id);
+                                                        }
+                                                    }}
+                                                />
                                                 <TextField
                                                     size="small"
                                                     type="number"
                                                     label="Grammage"
                                                     value={layer.grammage}
                                                     onChange={(e) => handleRctLayerChange(idx, 'grammage', e.target.value)}
-                                                    sx={{ flex: 1.5 }}
+                                                    sx={{ flex: 1.2 }}
                                                 />
                                                 <IconButton 
                                                     size="small" 
@@ -321,6 +420,19 @@ export default function CalculatorClient({
                                                 <Grid size={{ xs: 6 }}><TextField fullWidth label="Width" type="number" value={width} onChange={(e) => setWidth(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
                                                 <Grid size={{ xs: 6 }}><TextField fullWidth label="Height" type="number" value={height} onChange={(e) => setHeight(e.target.value)} size="small" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
                                                 <Grid size={{ xs: 6 }}><TextField fullWidth label="Thickness" type="number" value={thickness} onChange={(e) => setThickness(e.target.value)} size="small" placeholder="Auto" slotProps={{ input: { endAdornment: <InputAdornment position="end">mm</InputAdornment> } }}/></Grid>
+                                                <Grid size={{ xs: 12 }}>
+                                                    <TextField 
+                                                        fullWidth 
+                                                        label="QA Target Strength (Optional)" 
+                                                        type="number" 
+                                                        value={qaTarget} 
+                                                        onChange={(e) => setQaTarget(e.target.value)} 
+                                                        size="small" 
+                                                        color="secondary"
+                                                        slotProps={{ input: { endAdornment: <InputAdornment position="end">kgf</InputAdornment> } }}
+                                                        helperText="Setting a target enables instant Pass/Fail validation"
+                                                    />
+                                                </Grid>
                                             </Grid>
                                         )}
                                     </Stack>
@@ -411,6 +523,43 @@ export default function CalculatorClient({
 
                 {result ? (
                     <Stack spacing={3}>
+                        {/* Floor QA Verdict (Phase 1/5 Optimization) */}
+                        {mode === 'box' && qaTarget && (
+                            <MuiPaper 
+                                elevation={0} 
+                                sx={{ 
+                                    p: 3, 
+                                    borderRadius: 4, 
+                                    textAlign: 'center',
+                                    border: '4px solid',
+                                    borderColor: (result.bct_kgf || 0) >= Number(qaTarget) ? 'success.main' : 'error.main',
+                                    bgcolor: (result.bct_kgf || 0) >= Number(qaTarget) ? 'success.50' : 'error.50'
+                                }}
+                            >
+                                <Typography variant="overline" sx={{ fontWeight: 'bold', letterSpacing: 2 }}>FLOOR QA VERDICT</Typography>
+                                <Typography variant="h1" sx={{ fontWeight: 900, color: (result.bct_kgf || 0) >= Number(qaTarget) ? 'success.main' : 'error.main', lineHeight: 1 }}>
+                                    {(result.bct_kgf || 0) >= Number(qaTarget) ? 'PASS' : 'FAIL'}
+                                </Typography>
+                                <Typography variant="body1" sx={{ mt: 1, fontWeight: 500 }}>
+                                    Predicted: <strong>{result.bct_kgf?.toFixed(1)}kgf</strong> vs Target: <strong>{qaTarget}kgf</strong>
+                                </Typography>
+                            </MuiPaper>
+                        )}
+
+                        {/* 3D Preview for Box Mode */}
+                        {mode === 'box' && (
+                            <MuiPaper variant="outlined" sx={{ height: 300, borderRadius: 3, overflow: 'hidden', position: 'relative' }}>
+                                <Box3D dimensions={{ 
+                                    length: Number(length) || 300, 
+                                    width: Number(width) || 200, 
+                                    height: Number(height) || 200 
+                                }} />
+                                <Box sx={{ position: 'absolute', top: 10, left: 10, bgcolor: 'rgba(255,255,255,0.8)', px: 1, borderRadius: 1 }}>
+                                    <Typography variant="caption" fontWeight="bold">3D SPATIAL PREVIEW</Typography>
+                                </Box>
+                            </MuiPaper>
+                        )}
+
                         <Grid container spacing={2}>
                             {mode === 'box' ? (
                                 <>
@@ -476,11 +625,31 @@ export default function CalculatorClient({
                                 </>
                             )}
                         </Grid>
+
+                        {/* Certificate Section (Phase 4) */}
+                        <Card variant="outlined" sx={{ border: '2px solid', borderColor: 'success.light', bgcolor: 'success.50', borderRadius: 3 }}>
+                            <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Box>
+                                    <Typography variant="subtitle1" sx={{ color: 'success.dark', fontWeight: 'bold' }}>Sustainability Certified</Typography>
+                                    <Typography variant="body2" color="text.secondary">Generate a formal Carbon Footprint & Structural Analysis report.</Typography>
+                                </Box>
+                                <Button 
+                                    variant="contained" 
+                                    color="success" 
+                                    startIcon={downloading ? <CircularProgress size={20} color="inherit" /> : <PictureAsPdfIcon />}
+                                    onClick={handleDownloadCertificate}
+                                    disabled={downloading}
+                                >
+                                    {downloading ? 'Generating...' : 'Download Certificate'}
+                                </Button>
+                            </CardContent>
+                        </Card>
+
                         <Box>
                              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}><LayersIcon sx={{ mr: 1 }} color="action" />Layer Composition</Typography>
                             <Stack spacing={1} sx={{ mt: 2 }}>
                                 {result.layers?.map((layer, index) => {
-                                    const resolvedPaper = layer.paper || papers.find(p => p.type === layer.type);
+                                    const resolvedPaper = layer.paper || papers.find(p => p.code === layer.type);
                                     return (
                                         <MuiPaper key={index} elevation={0} sx={{ p: 2, borderLeft: '6px solid', borderLeftColor: layer.isLiner ? 'secondary.main' : 'grey.400', bgcolor: layer.isLiner ? 'background.paper' : 'grey.100', border: '1px solid', borderColor: 'divider', borderLeftWidth: 6, transition: 'transform 0.2s', '&:hover': { transform: 'translateX(4px)' } }}>
                                             <Grid container alignItems="center">
