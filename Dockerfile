@@ -1,5 +1,7 @@
 FROM node:24-alpine AS base
 
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Stage 1: Install dependencies
 FROM base AS deps
 WORKDIR /app
