@@ -14,9 +14,11 @@ export default function BatchPage() {
         <Container maxWidth="xl" sx={{ py: 4 }}>
             <Box sx={{ mb: 4 }}>
                 <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb" sx={{ mb: 2 }}>
-                    <MuiLink component={Link} underline="hover" color="inherit" href="/">
-                        Home
-                    </MuiLink>
+                    <Link href="/" passHref legacyBehavior>
+                        <MuiLink underline="hover" color="inherit">
+                            Home
+                        </MuiLink>
+                    </Link>
                     <Typography color="text.primary">Batch Processing</Typography>
                 </Breadcrumbs>
                 
