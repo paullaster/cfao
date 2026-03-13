@@ -24,4 +24,4 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
-CMD ["pnpm", "start"]
+CMD ["node", "server.js"]
